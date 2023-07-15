@@ -1,0 +1,188 @@
+---
+title: "Formulaire-Tailwind"
+author: "Doris"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo=FALSE}
+
+library(shiny)
+library(readr)
+
+ui <- fluidPage(
+  tags$head(
+    tags$meta(charset = "UTF-8"),
+    tags$meta("http-equiv" = "X-UA-Compatible", content = "IE=edge"),
+    tags$meta(name = "viewport", content = "width=device-width, initial-scale=1.0"),
+    tags$script(src = "https://cdn.tailwindcss.com"),
+    tags$link(href = "https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css", rel = "stylesheet")
+  ),
+  
+  tags$style("
+    .custom-input {
+      padding: 0.5rem 1rem;
+      border-width: 1px;
+      border-radius: 0.25rem;
+      background-color: #f7fafc;
+      width: 100%;
+    }
+  "),
+  
+  titlePanel("Exemple de formulaire Shiny avec Tailwind CSS"),
+  
+  sidebarLayout(
+    
+    sidebarPanel(
+      
+      div(class = "mb-4",
+          tags$select(id = "select", class = "custom-input",
+                      tags$option(""),
+                      tags$option("Option 1"),
+                      tags$option("Option 2"),
+                      tags$option("Option 3"))
+          
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Select multiple roles"),
+          div(class = "relative flex w-full",
+              tags$select(
+                id = "select-role",
+                name = "roles[]",
+                multiple = "multiple",
+                placeholder = "Select roles...",
+                autocomplete = "off",
+                class = "block w-full rounded-sm cursor-pointer focus:outline-none",
+                tags$option(value = "1", "super admin"),
+                tags$option(value = "2", "admin"),
+                tags$option(value = "3", "writer"),
+                tags$option(value = "4", "user")
+              )
+          )
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Text input"),
+          tags$input(type = "text", id = "text_input", class = "block w-full custom-input", placeholder = "Enter text...")
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Textarea"),
+          tags$textarea(id = "textarea_input", class = "block w-full rounded-sm custom-input", placeholder = "Enter text...")
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Checkbox"),
+          tags$input(id = "checkbox_input", type = "checkbox", class = "block", value = "checkbox")
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Radio buttons"),
+          tags$div(class = "flex items-center",
+                   tags$input(id = "radio_input", type = "radio", class = "mr-1", name = "radio", value = "option1"),
+                   tags$span("Option 1")
+          ),
+          tags$div(class = "flex items-center",
+                   tags$input(id = "radio_input1", type = "radio", class = "mr-1", name = "radio", value = "option2"),
+                   tags$span("Option 2")
+          ),
+          tags$div(class = "flex items-center",
+                   tags$input(id = "radio_input2", type = "radio", class = "mr-1", name = "radio", value = "option3"),
+                   tags$span("Option 3")
+          )
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Slider"),
+          tags$input(id = "range_input", type = "range", class = "block w-full", min = 0, max = 100, value = 50)
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Date input"),
+          tags$input(id = "date_input", type = "date", class = "block w-full custom-input")
+      ),
+      
+      div(class = "mb-4",
+          tags$label(class = "inline-block text-sm text-gray-600", "Datetime input"),
+          tags$input(id = "datetime-local_input", type = "datetime-local", class = "block w-full custom-input")
+      ),
+      
+      div(class = "w-full",
+          actionButton("submit_button", "Submit", class = "block px-4 py-2 bg-blue-500 text-white rounded-lg")
+      ),
+      
+      # Message d'erreur
+      div(id = "error_message", style = "color: red; font-weight: bold;"),
+      
+    ),
+    
+    mainPanel(
+      verbatimTextOutput("form_data")
+    )
+    
+  ),
+  
+  tags$script(src = "https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"),
+  
+  tags$script("
+    $(document).ready(function() {
+      new TomSelect('#select-role', {
+        maxItems: 3,
+      });
+    });
+  ")
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$submit_button, {
+    # Réinitialiser le message d'erreur
+    
+    
+    # Récupérer les valeurs des éléments du formulaire ici
+    select_input <- input$select
+    select_role_input <- input$select_role
+    text_input <- input$text_input
+    textarea_input <- input$textarea_input
+    checkbox_input <- input$checkbox_input
+    radio_input <- input$radio_input # Modifier cette ligne pour utiliser input$radio
+    slider_input <- input$range_input
+    date_input <- input$date_input
+    datetime_input <- input$datetime_local_input
+    
+    tryCatch({
+      # Créer un dataframe avec les valeurs du formulaire
+      data <- data.frame(
+        "Select input" = ifelse(is.null(select_input), NA, select_input),
+        "Select role input" = ifelse(is.null(select_role_input), NA, select_role_input),
+        "Text input" = ifelse(is.null(text_input), "", text_input),
+        "Textarea" = ifelse(is.null(textarea_input), "", textarea_input),
+        "Checkbox" = checkbox_input,
+        "Radio buttons" = ifelse(is.null(radio_input), NA, radio_input),
+        "Slider" = slider_input,
+        "Date input" = ifelse(is.null(date_input), NA, date_input),
+        "Datetime input" = ifelse(is.null(datetime_input), NA, datetime_input)
+      )
+      
+      # Enregistrer le dataframe dans un fichier CSV
+      #write.csv(data, "./formulaire_data.csv")
+      
+      # Afficher les données du formulaire dans la zone de texte
+      print(data)
+      
+      
+    })
+  })
+}
+
+shinyApp(ui, server)
+
+
+```
+
+

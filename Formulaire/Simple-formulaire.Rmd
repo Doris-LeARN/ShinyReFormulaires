@@ -1,0 +1,93 @@
+---
+title: "Formulaire-Simple"
+author: "Doris"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+```
+
+```{r}
+library(shiny)
+library(shinyWidgets)
+library(here)
+```
+
+```{r}
+
+ui <- fluidPage(
+  titlePanel("Exemple de formulaire Shiny"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      # Champ de texte
+      textInput("text", "Champ de texte", value = ""),
+      
+      # Zone de texte
+      textAreaInput("textarea", "Zone de texte", value = ""),
+      
+      # Sélection simple
+      selectInput("select", "Sélection simple",
+                  choices = c("Option 1", "Option 2", "Option 3"),
+                  selected = "Option 1"),
+      
+      # Sélection multiple
+      selectInput("multiselect", "Sélection multiple",
+                  choices = c("Option 1", "Option 2", "Option 3"),
+                  multiple = TRUE),
+      
+      # Cases à cocher
+      checkboxInput("checkbox", "Case à cocher", value = FALSE),
+      
+      # Bouton d'option
+      radioButtons("radio", "Bouton d'option",
+                   choices = c("Option 1", "Option 2", "Option 3"),
+                   selected = "Option 1"),
+      
+      # Curseur
+      sliderInput("slider", "Curseur",
+                  min = 0, max = 100, value = 50),
+      
+      # Sélecteur de date
+      dateInput("date", "Sélecteur de date", value = Sys.Date()),
+      
+      # Sélecteur de date
+      dateInput("date", "Sélectionner la date", value = Sys.Date()),
+      
+      # Action bouton
+      actionButton("button", "Bouton d'action")
+    ),
+    
+    mainPanel(
+      verbatimTextOutput("output")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  output$output <- renderPrint({
+    list(
+      "Champ de texte" = input$text,
+      "Zone de texte" = input$textarea,
+      "Sélection simple" = input$select,
+      "Sélection multiple" = input$multiselect,
+      "Case à cocher" = input$checkbox,
+      "Bouton d'option" = input$radio,
+      "Curseur" = input$slider,
+      "Sélecteur de date" = input$date,
+      "Date sélectionnée" = input$date,
+      "Bouton d'action" = input$button
+    )
+  })
+}
+
+shinyApp(ui = ui, server = server)
+
+```
